@@ -1,12 +1,23 @@
 import sys
 
-def rabin_karp(pattern, text):
-    p_len = len(pattern)
-    t_len = len(text)
-    p_hash = hash(pattern)
-    t_hashes = [hash(text[i:i+p_len]) for i in range(t_len - p_len + 1)]
-    indices = [i for i, h in enumerate(t_hashes) if h == p_hash]
+def rolling_hash(s, p):
+    d = 256  # number of possible characters
+    q = 101  # prime modulus
+    h = pow(d, p-1, q)  # h = d^(p-1) mod q
+    t = 0
+    p_hash = sum(ord(p[i]) * pow(d, p-1-i, q) for i in range(p))
+    for i in range(p):
+        t = (d*t + ord(s[i])) % q
+    indices = []
+    for i in range(len(s)-p+1):
+        if p_hash == t and s[i:i+p] == p:
+            indices.append(i)
+        if i < len(s)-p:
+            t = (d*(t-ord(s[i])*h) + ord(s[i+p])) % q
     return indices
+
+def rabin_karp(pattern, text):
+    return rolling_hash(text, pattern)
 
 if __name__ == '__main__':
     input_type = input("Enter input type (I for keyboard, F for file): ")
